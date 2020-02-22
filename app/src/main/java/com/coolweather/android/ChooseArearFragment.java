@@ -2,7 +2,9 @@ package com.coolweather.android;
 
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +27,6 @@ import com.coolweather.android.util.Utility;
 
 import org.jetbrains.annotations.NotNull;
 import org.litepal.LitePal;
-import org.litepal.crud.LitePalSupport;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +65,7 @@ public class ChooseArearFragment extends Fragment {
         adapter = new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1,
                 dataList);
         listView.setAdapter(adapter);
+       // Log.d("创建视图","执行？");
         return view;
     }
 
@@ -80,7 +81,26 @@ public class ChooseArearFragment extends Fragment {
                 }else if (currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(position);
                     queryCounties();
+                }else if (currentLevel == LEVEL_COUNTY){
+                  //  String weatherId = countyList.get(position).getWeatherId();
+                    String countyName = countyList.get(position).getCountyName();
+                    if (getActivity() instanceof MainActivity){
+                        Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                        intent.putExtra("county_name",countyName);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }else if (getActivity() instanceof WeatherActivity){
+                        //操作WeatherActivity的函数和变量
+                        WeatherActivity activity =(WeatherActivity) getActivity();
+                        activity.drawerLayout.closeDrawers();
+                        activity.swipeRefresh.setRefreshing(true);
+                        activity.requestWeather(countyName,"now");
+                        activity.requestWeather(countyName,"forecast");
+                        activity.requestWeather(countyName,"lifestyle");
+                    }
+
                 }
+
             }
         });
         backButton.setOnClickListener(new View.OnClickListener() {
